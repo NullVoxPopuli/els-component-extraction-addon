@@ -1,3 +1,6 @@
+'use strict';
+
+
 function normalizeToAngleBracketComponent(name) {
   const SIMPLE_DASHERIZE_REGEXP = /[a-z]|\/|-/g;
   const ALPHA = /[A-Za-z0-9]/;
@@ -67,7 +70,9 @@ function watcherFn(uri, changeType) {
   matchFunctions.forEach((fn) => fn(uri));
 }
 
-module.exports.normalizeToAngleBracketComponent = normalizeToAngleBracketComponent;
-module.exports.watcherFn = watcherFn;
-module.exports.waitForFileNameContains = waitForFileNameContains;
-module.exports.hasMatchFunctions = hasMatchFunctions;
+module.exports = {
+  normalizeToAngleBracketComponent,
+  watcherFn,
+  waitForFileNameContains,
+  hasMatchFunctions,
+};

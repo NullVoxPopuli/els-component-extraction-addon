@@ -52,6 +52,7 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
       args: [],
     };
     let rootRegistry = server.getRegistry(project.root);
+
     try {
       const helpers = Object.keys(rootRegistry["helper"]);
       const components = Object.keys(rootRegistry["component"]);
@@ -64,10 +65,8 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
     } catch (e) {
       console.log(e.toString());
     }
-    let { code, args, shape } = result;
-    let argNames = args
-      .slice(0)
-      .map((el) => el.split("=")[0].replace("@", ""));
+
+    let { code, args } = result;
 
     if (args.length) {
       args = "  " + args.join("\n  ");
@@ -80,10 +79,8 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
     const tagName = normalizeToAngleBracketComponent(componentName);
     const waiter = waitForFileNameContains(componentName);
 
-    await server.onExecute({
-      command: "els.executeInEmberCLI",
-      arguments: [filePath, `g component ${rawComponentName}`],
-    });
+    // TODO: should there be a confirm step?
+    await createEmptyComponent(filePath, rawComponentName);
 
     try {
       await waiter;
@@ -105,9 +102,6 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
     const componentRegistry = registry["component"][componentName];
     const fileName = componentRegistry.find((file) =>
       file.endsWith(".hbs")
-    );
-    const testFileName = componentRegistry.find(
-      (file) => file.includes("test") && file.endsWith(".js")
     );
 
     if (!fileName) {
@@ -133,31 +127,6 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
         ],
       },
     };
-
-    if (testFileName) {
-      try {
-        const testContent = fs.readFileSync(testFileName, "utf8");
-        const newTestContent = transformTests(
-          testContent,
-          tagName,
-          argNames, shape
-        );
-        edit.changes[URI.file(testFileName).toString()] = [
-          TextEdit.replace(
-            Range.create(
-              Position.create(0, 0),
-              Position.create(
-                testContent.split("\n").length,
-                testContent.length
-              )
-            ),
-            newTestContent
-          ),
-        ];
-      } catch (e) {
-        console.log(e.toString());
-      }
-    }
 
     await server.connection.workspace.applyEdit(edit);
   } catch (e) {
