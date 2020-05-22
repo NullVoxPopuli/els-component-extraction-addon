@@ -1,7 +1,6 @@
 "use strict";
 
 const { TextEdit, Position, Range, Command } = require("vscode-languageserver");
-const fs = require("fs");
 const { URI } = require("vscode-uri");
 
 const {
@@ -10,7 +9,6 @@ const {
   watcherFn,
 } = require("./utils");
 const { transformSelection } = require("./transformers");
-const { transformTests } = require("./testing-transformers");
 
 /**
  * Entrypoint to this ELS addon.
@@ -51,16 +49,16 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
       shape: {},
       args: [],
     };
-    let rootRegistry = server.getRegistry(project.root);
+    // let rootRegistry = server.getRegistry(project.root);
 
     try {
-      const helpers = Object.keys(rootRegistry["helper"]);
-      const components = Object.keys(rootRegistry["component"]);
-      const modifiers = Object.keys(rootRegistry["modifier"]);
+      // const helpers = Object.keys(rootRegistry["helper"]);
+      // const components = Object.keys(rootRegistry["component"]);
+      // const modifiers = Object.keys(rootRegistry["modifier"]);
 
       result = transformSelection(
         source,
-        [].concat(helpers, components, modifiers)
+        // [].concat(helpers, components, modifiers)
       );
     } catch (e) {
       console.log(e.toString());
@@ -115,7 +113,7 @@ async function extractTemplateCodeToComponent(server, filePath, [rawComponentNam
 
     const edit = {
       changes: {
-        [uri]: [TextEdit.replace(range, `<${tagName} ${args}/>`)],
+        [uri]: [TextEdit.replace(range, `<${tagName} ${args} />`)],
         [fileUri]: [
           TextEdit.replace(
             Range.create(
